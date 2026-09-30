@@ -85,3 +85,33 @@ export interface SimulationResult {
   criticalChokepoints: string[];
   contingencyResponse: string[];
 }
+
+export interface IntelDiscrepancyItem {
+  id: string;
+  category: 'GEO_LOCATION' | 'ENTITY_CONFLICT' | 'TEMPORAL_MISMATCH' | 'TACTICAL_ASSESSMENT' | 'SOURCE_CREDIBILITY';
+  severity: 'CRITICAL_CONFLICT' | 'MODERATE_DISCREPANCY' | 'COMPLEMENTARY_INFO';
+  title: string;
+  sourceAClaim: string;
+  sourceBClaim: string;
+  conflictSnippetA?: string;
+  conflictSnippetB?: string;
+  analysis: string;
+  recommendedVerdict: 'FAVOR_A' | 'FAVOR_B' | 'COMPROMISE' | 'NEEDS_VERIFICATION';
+}
+
+export interface IntelComparisonResult {
+  summary: string;
+  overallConsistencyScore: number; // 0-100
+  geoDistanceDeltaKm?: number;
+  timeDeltaHours?: number;
+  keyDiscrepancies: IntelDiscrepancyItem[];
+  deceptionHypothesis: string;
+  admiraltyVerdict: {
+    sourceAReliability: string;
+    sourceBReliability: string;
+    higherTrustSource: 'SOURCE_A' | 'SOURCE_B' | 'EQUIVALENT';
+    justification: string;
+  };
+  recommendedActions: string[];
+}
+

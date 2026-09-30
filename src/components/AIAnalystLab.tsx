@@ -6,9 +6,10 @@ import {
 import { 
   Sparkles, Shield, Cpu, RefreshCw, Send, CheckCircle2, 
   AlertTriangle, Crosshair, HelpCircle, Layers, ArrowRight, 
-  BookmarkPlus, Network, GitBranch, ArrowUpRight 
+  BookmarkPlus, Network, GitBranch, ArrowUpRight, SplitSquareVertical 
 } from 'lucide-react';
 import { EntityRelevanceTimeline } from './EntityRelevanceTimeline';
+import { DualPaneIntelComparison } from './DualPaneIntelComparison';
 import { INITIAL_INTEL_REPORTS, INITIAL_ENTITIES } from '../data/mockIntelligence';
 
 interface AIAnalystLabProps {
@@ -26,7 +27,7 @@ export const AIAnalystLab: React.FC<AIAnalystLabProps> = ({
   entities = INITIAL_ENTITIES,
   onSelectIntelReportById,
 }) => {
-  const [activeMode, setActiveMode] = useState<'ANALYZE' | 'TIMELINE' | 'SIMULATE' | 'QUERY'>('ANALYZE');
+  const [activeMode, setActiveMode] = useState<'ANALYZE' | 'TIMELINE' | 'COMPARE' | 'SIMULATE' | 'QUERY'>('ANALYZE');
 
   // Currently analyzed report object
   const [currentAnalyzedReport, setCurrentAnalyzedReport] = useState<IntelReport>(() => {
@@ -280,6 +281,22 @@ export const AIAnalystLab: React.FC<AIAnalystLabProps> = ({
               activeMode === 'TIMELINE' ? 'bg-slate-950 text-amber-300' : 'bg-amber-500/20 text-amber-300'
             }`}>
               {quickCorrelatedCount}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveMode('COMPARE')}
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeMode === 'COMPARE'
+                ? 'bg-amber-400 text-slate-950 font-semibold shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <SplitSquareVertical className="w-3.5 h-3.5" />
+            <span>双窗格情报比对</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
+              activeMode === 'COMPARE' ? 'bg-slate-950 text-amber-300' : 'bg-rose-500/20 text-rose-300'
+            }`}>
+              AI矛盾提取
             </span>
           </button>
           <button
@@ -634,6 +651,18 @@ export const AIAnalystLab: React.FC<AIAnalystLabProps> = ({
                 handleSelectReportToAnalyze(rep);
                 setActiveMode('ANALYZE');
               }}
+              onSelectIntelReportById={onSelectIntelReportById}
+            />
+          </div>
+        )}
+
+        {/* MODE: DUAL-PANE INTEL COMPARISON */}
+        {activeMode === 'COMPARE' && (
+          <div className="max-w-7xl mx-auto h-[calc(100vh-8.5rem)] rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
+            <DualPaneIntelComparison
+              reports={reports}
+              initialReportA={currentAnalyzedReport}
+              initialReportB={reports.find((r) => r.id !== currentAnalyzedReport.id)}
               onSelectIntelReportById={onSelectIntelReportById}
             />
           </div>
