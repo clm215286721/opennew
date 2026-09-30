@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix 天玑战略情报研判系统 (Apex Intelligence System)",
+  "description": "国家级与防务级多源战略情报分析系统，涵盖全球态势感知、OSINT采集研判、实体关系图谱、威胁矩阵及AI推演分析。",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
