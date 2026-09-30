@@ -2,8 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { TargetEntity, ThreatLevel, IntelReport } from '../types/intelligence';
 import { 
   Network, Search, User, ShieldAlert, Cpu, Anchor, 
-  Building2, Radio, Zap, ArrowRight, Eye, Crosshair 
+  Building2, Radio, Zap, ArrowRight, Eye, Crosshair,
+  TrendingUp, Activity, BarChart2, Calendar
 } from 'lucide-react';
+import { EntityInfluenceTemporalChart } from './EntityInfluenceTemporalChart';
 
 interface EntityGraphProps {
   entities: TargetEntity[];
@@ -20,6 +22,7 @@ export const EntityGraph: React.FC<EntityGraphProps> = ({
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [activeEntityId, setActiveEntityId] = useState<string>(entities[0]?.id || '');
   const [hoveredEntityId, setHoveredEntityId] = useState<string | null>(null);
+  const [dossierTab, setDossierTab] = useState<'profile' | 'influence'>('profile');
 
   // Position nodes in an aesthetically balanced tactical force layout
   const graphWidth = 800;
@@ -293,7 +296,33 @@ export const EntityGraph: React.FC<EntityGraphProps> = ({
         </div>
 
         {/* Right Column: Target Dossier (lg:col-span-4) */}
-        <div className="lg:col-span-4 bg-[#0a0f19] flex flex-col h-full overflow-y-auto p-5 gap-5">
+        <div className="lg:col-span-4 bg-[#0a0f19] flex flex-col h-full overflow-y-auto p-4 sm:p-5 gap-4">
+          {/* Top Segmented Navigation Tabs */}
+          <div className="flex items-center border-b border-slate-800 bg-[#070c16] text-xs font-mono shrink-0 -mx-4 sm:-mx-5 -mt-4 sm:-mt-5 mb-1">
+            <button
+              onClick={() => setDossierTab('profile')}
+              className={`flex-1 py-2.5 px-3 flex items-center justify-center gap-1.5 border-b-2 font-medium transition-colors cursor-pointer ${
+                dossierTab === 'profile'
+                  ? 'border-amber-400 text-amber-400 font-semibold bg-slate-900/40'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>全景档案</span>
+            </button>
+            <button
+              onClick={() => setDossierTab('influence')}
+              className={`flex-1 py-2.5 px-3 flex items-center justify-center gap-1.5 border-b-2 font-medium transition-colors cursor-pointer ${
+                dossierTab === 'influence'
+                  ? 'border-amber-400 text-amber-300 font-semibold bg-slate-900/40'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+              <span>影响力时序分析</span>
+            </button>
+          </div>
+
           {activeEntity ? (
             <div className="flex flex-col gap-4">
               {/* Dossier Header */}
@@ -348,55 +377,66 @@ export const EntityGraph: React.FC<EntityGraphProps> = ({
                 </div>
               </div>
 
-              {/* Affiliation & Coordinate Details */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  组织隶属与活动区域
-                </span>
-                <div className="p-3 bg-slate-900/40 rounded border border-slate-800 text-xs text-slate-300 font-mono flex flex-col gap-1">
-                  <p><strong>隶属关系:</strong> {activeEntity.affiliation}</p>
-                  <p><strong>活动坐标:</strong> {activeEntity.coordinates.lat}°N, {activeEntity.coordinates.lng}°E</p>
-                </div>
-              </div>
+              {/* Entity Influence Temporal Analysis Line Chart Component */}
+              <EntityInfluenceTemporalChart
+                entity={activeEntity}
+                reports={reports}
+                onSelectIntelReport={onSelectIntelReport}
+              />
 
-              {/* Background Details */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  情报背景与侦控详情
-                </span>
-                <p className="text-xs leading-relaxed text-slate-300 bg-slate-900/30 p-3 rounded border border-slate-800/60">
-                  {activeEntity.details}
-                </p>
-              </div>
-
-              {/* Linked Nodes */}
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-between">
-                  <span>拓扑关联目标 ({activeLinks.length})</span>
-                  <span className="text-[11px] font-normal text-slate-500 font-mono">点击直接切换</span>
-                </span>
-                <div className="flex flex-col gap-1.5">
-                  {activeLinks.map((link, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => link.target && setActiveEntityId(link.target.id)}
-                      className="p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800/80 rounded flex items-center justify-between cursor-pointer transition-colors text-xs"
-                    >
-                      <div className="flex items-center gap-2">
-                        <ArrowRight className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        <span className="font-semibold text-slate-200">{link.target?.name}</span>
-                        <span className="text-[11px] font-mono text-slate-500">({link.target?.codeName})</span>
-                      </div>
-                      <span className="text-[11px] font-mono text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded">
-                        {link.relation}
-                      </span>
+              {dossierTab === 'profile' && (
+                <>
+                  {/* Affiliation & Coordinate Details */}
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      组织隶属与活动区域
+                    </span>
+                    <div className="p-3 bg-slate-900/40 rounded border border-slate-800 text-xs text-slate-300 font-mono flex flex-col gap-1">
+                      <p><strong>隶属关系:</strong> {activeEntity.affiliation}</p>
+                      <p><strong>活动坐标:</strong> {activeEntity.coordinates.lat}°N, {activeEntity.coordinates.lng}°E</p>
                     </div>
-                  ))}
-                  {activeLinks.length === 0 && (
-                    <p className="text-xs text-slate-500">暂无直接关联节点</p>
-                  )}
-                </div>
-              </div>
+                  </div>
+
+                  {/* Background Details */}
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      情报背景与侦控详情
+                    </span>
+                    <p className="text-xs leading-relaxed text-slate-300 bg-slate-900/30 p-3 rounded border border-slate-800/60">
+                      {activeEntity.details}
+                    </p>
+                  </div>
+
+                  {/* Linked Nodes */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                      <span>拓扑关联目标 ({activeLinks.length})</span>
+                      <span className="text-[11px] font-normal text-slate-500 font-mono">点击直接切换</span>
+                    </span>
+                    <div className="flex flex-col gap-1.5">
+                      {activeLinks.map((link, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => link.target && setActiveEntityId(link.target.id)}
+                          className="p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800/80 rounded flex items-center justify-between cursor-pointer transition-colors text-xs"
+                        >
+                          <div className="flex items-center gap-2">
+                            <ArrowRight className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="font-semibold text-slate-200">{link.target?.name}</span>
+                            <span className="text-[11px] font-mono text-slate-500">({link.target?.codeName})</span>
+                          </div>
+                          <span className="text-[11px] font-mono text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded">
+                            {link.relation}
+                          </span>
+                        </div>
+                      ))}
+                      {activeLinks.length === 0 && (
+                        <p className="text-xs text-slate-500">暂无直接关联节点</p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Related Classified Reports */}
               <div className="flex flex-col gap-2 border-t border-slate-800 pt-3">
