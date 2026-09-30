@@ -6,6 +6,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { DailyIntelBriefModal, DailyIntelBriefData } from './DailyIntelBriefModal';
+import { ExportBriefingModal } from './ExportBriefingModal';
 
 interface BriefingCenterProps {
   reports: IntelReport[];
@@ -28,6 +29,7 @@ export const BriefingCenter: React.FC<BriefingCenterProps> = ({
   const [activeReportId, setActiveReportId] = useState<string>(selectedReportId || reports[0]?.id || '');
   const [showAdmiraltyInfo, setShowAdmiraltyInfo] = useState<boolean>(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
 
   // Daily Intelligence Brief states
   const [isDailyBriefOpen, setIsDailyBriefOpen] = useState<boolean>(false);
@@ -499,12 +501,12 @@ ${activeReport.priorityAction || '持续保持多波段被动信号监听与低�
                   </button>
 
                   <button
-                    onClick={handleExportBriefing}
-                    disabled={isExporting}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-slate-100 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded transition-colors cursor-pointer"
+                    onClick={() => setIsExportModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-100 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded transition-colors cursor-pointer shadow-sm shadow-emerald-500/10"
+                    title="将当前报告分析结果导出为 PDF 或 JSON 格式战术数据包"
                   >
                     <Download className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{isExporting ? '生成中...' : '导出防务简报'}</span>
+                    <span>导出情报简报 (PDF / JSON)</span>
                   </button>
                 </div>
 
@@ -592,6 +594,15 @@ ${activeReport.priorityAction || '持续保持多波段被动信号监听与低�
           if (activeReport) onSendToAIAnalyst(activeReport);
         }}
       />
+
+      {/* Export Intelligence Brief Tactical Package Modal */}
+      {activeReport && (
+        <ExportBriefingModal
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          report={activeReport}
+        />
+      )}
     </div>
   );
 };
